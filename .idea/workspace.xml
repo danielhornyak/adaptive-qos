@@ -4,7 +4,21 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f05d3d4b-d08c-4665-b78d-41aebbd06f47" name="Changes" comment="project" />
+    <list default="true" id="f05d3d4b-d08c-4665-b78d-41aebbd06f47" name="Changes" comment="project">
+      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/Dockerfile" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/dashboard.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/monitor.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/qos_selector.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/responder.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/tc_configurator.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/docker-compose.yml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -14,8 +28,8 @@
     <option name="RECENT_TEMPLATES">
       <list>
         <option value="HTML File" />
-        <option value="Dockerfile" />
         <option value="Python Script" />
+        <option value="Dockerfile" />
       </list>
     </option>
   </component>
@@ -44,10 +58,12 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
+    "ASKED_SHARE_PROJECT_CONFIGURATION_FILES": "true",
     "DefaultHtmlFileTemplate": "HTML File",
     "Python.dashboard.executor": "Run",
     "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "master",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "git-widget-placeholder": "main",
     "ignore.virus.scanning.warn.message": "true",
     "last_opened_file_path": "C:/Users/horny/PycharmProjects/adaptive-qos",
     "node.js.detected.package.eslint": "true",
@@ -91,6 +107,7 @@
       <workItem from="1746584410889" duration="8762000" />
       <workItem from="1746607595998" duration="19940000" />
       <workItem from="1747049525962" duration="17935000" />
+      <workItem from="1747070284434" duration="885000" />
     </task>
     <task id="LOCAL-00001" summary="project">
       <option name="closed" value="true" />
