@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <title>Dinamikus QoS Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        h1 { text-align: center; }
+        .chart-container { width: 80%; margin: auto; }
+        table { width: 60%; margin: 40px auto; border-collapse: collapse; text-align: center; }
+        th, td { border: 1px solid #ccc; padding: 8px 12px; }
+        th { background-color: #f0f0f0; }
+        .form-container { text-align: center; margin-top: 30px; }
+    </style>
+</head>
+<body>
+    <h1>Dinamikus QoS Dashboard</h1>
+
+    <div class="form-container">
+        <label for="latency">Késleltetés (ms): </label>
+        <input type="number" id="latency" value="50">
+        <label for="loss">Csomagvesztés (%): </label>
+        <input type="number" id="loss" value="0.5" step="0.1">
+        <button onclick="setNetwork()">Beállítás</button>
+    </div>
+
+    <div>
+        <label for="mode">QoS mód:</label>
+        <select id="mode" onchange="updateQoS()">
+            <option value="auto">Automatikus</option>
+            <option value="manual">Manuális</option>
+        </select>
+
+        <label for="level">Fix QoS szint:</label>
+        <select id="level" onchange="updateQoS()">
+            <option value="0">QoS 0</option>
+            <option value="1">QoS 1</option>
+            <option value="2">QoS 2</option>
+        </select>
+    </div>
+
+    <!-- Grafikonok -->
+    <div class="chart-container"><canvas id="latencyChart"></canvas></div>
+    <div class="chart-container"><canvas id="lossChart"></canvas></div>
+    <div class="chart-container"><canvas id="qosChart"></canvas></div>
+    <div class="chart-container"><canvas id="messageRateChart"></canvas></div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Átlagos késleltetés (ms)</th>
+                <th>Átlagos csomagvesztés (%)</th>
+                <th>Átlagos üzenetszám / perc</th>
+                <th>Átlagos QoS szint</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr id="avgRow">
+                <td>0</td><td>0</td><td>0</td><td>0</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <script>
+        const latencyChart = new Chart(document.getElementById('latencyChart').getContext('2d'), {
+            type: 'line', data: { labels: [], datasets: [{ label: 'Késleltetés (ms)', data: [], borderColor: 'blue', fill: false }] },
+            options: { responsive: true, scales: { y: { beginAtZero: true } } }
+        });
+
+        const lossChart = new Chart(document.getElementById('lossChart').getContext('2d'), {
+            type: 'line', data: { labels: [], datasets: [{ label: 'Csomagvesztés (%)', data: [], borderColor: 'red', fill: false }] },
+            options: { responsive: true, scales: { y: { beginAtZero: true } } }
+        });
+
+        const qosChart = new Chart(document.getElementById('qosChart').getContext('2d'), {
+            type: 'line', data: { labels: [], datasets: [{ label: 'QoS szint', data: [], borderColor: 'green', fill: false }] },
+            options: { responsive: true, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+        });
+
+        const messageRateChart = new Chart(document.getElementById('messageRateChart').getContext('2d'), {
+            type: 'line', data: { labels: [], datasets: [{ label: 'Üzenetszám / perc', data: [], borderColor: 'purple', fill: false }] },
+            options: { responsive: true, scales: { y: { beginAtZero: true } } }
+        });
+
+        const allLatency = [], allLoss = [], allMessages = [], allQos = [];
+
+        async function fetchData() {
+            const response = await fetch('/data');
+            const result = await response.json();
+            const timestamp = new Date().toLocaleTimeString();
+
+            latencyChart.data.labels.push(timestamp);
+            latencyChart.data.datasets[0].data.push(result.latency);
+            latencyChart.update();
+
+            lossChart.data.labels.push(timestamp);
+            lossChart.data.datasets[0].data.push(result.loss);
+            lossChart.update();
+
+            qosChart.data.labels.push(timestamp);
+            qosChart.data.datasets[0].data.push(result.qos);
+            qosChart.update();
+
+            messageRateChart.data.labels.push(timestamp);
+            messageRateChart.data.datasets[0].data.push(result.messages_per_minute);
+            messageRateChart.update();
+
+            allLatency.push(result.latency);
+            allLoss.push(result.loss);
+            allMessages.push(result.messages_per_minute);
+            allQos.push(result.qos);
+
+            const avg = arr => arr.reduce((a, b) => a + b, 0) / arr.length;
+            const avgRow = document.getElementById('avgRow');
+            avgRow.innerHTML =
+                <td>${avg(allLatency).toFixed(2)}</td>
+                <td>${avg(allLoss).toFixed(2)}</td>
+                <td>${avg(allMessages).toFixed(2)}</td>
+                <td>${avg(allQos).toFixed(2)}</td>
+            ;
+        }
+
+        async function setNetwork() {
+            const latency = document.getElementById("latency").value;
+            const loss = document.getElementById("loss").value;
+            await fetch("/set_network", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ latency, loss })
+            });
+        }
+        async function updateQoS() {
+            const mode = document.getElementById("mode").value;
+            const level = document.getElementById("level").value;
+            await fetch("/set_qos_mode", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ mode: mode, qos_level: level })
+    });
+}
+
+        setInterval(fetchData, 1000);
+    </script>
+</body>
+</html>
