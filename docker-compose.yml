@@ -1,23 +1,33 @@
-version: "3.9"
-
 services:
+  # MQTT Broker Service
+  mqtt-broker:
+    image: eclipse-mosquitto
+    ports:
+      - "1883:1883"
+    volumes:
+      - ./mosquitto.conf:/mosquitto/config/mosquitto.conf
+    networks:
+      - mqtt-net
 
+  # Dashboard Service
   dashboard:
     build:
-      context: ./app
       dockerfile: Dockerfile
     command: >
-      sh -c "python3 responder.py & python3 dashboard.py"
+      sh -c "python3 ./app/responder.py & python ./app/dashboard.py"
     volumes:
       - ./app/templates:/app/templates
     ports:
       - "5000:5000"
+      - "5678:5678"
     networks:
       - mqtt-net
-    restart: no
+    cap_add:
+      - NET_ADMIN
+    depends_on:
+      - mqtt-broker
 
 networks:
   mqtt-net:
     driver: bridge
-
 
