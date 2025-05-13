@@ -2,15 +2,6 @@ version: "3.9"
 
 services:
 
-  mqtt-broker:
-    image: eclipse-mosquitto
-    ports:
-      - "1883:1883"
-    volumes:
-      - ./mosquitto.conf:/mosquitto/config/mosquitto.conf
-    networks:
-      - mqtt-net
-
   dashboard:
     build:
       context: ./app
@@ -19,12 +10,14 @@ services:
       sh -c "python3 responder.py & python3 dashboard.py"
     volumes:
       - ./app/templates:/app/templates
-    network_mode: "host"
-    cap_add:
-      - NET_ADMIN
-    restart: unless-stopped
-    depends_on:
-      - mqtt-broker
+    ports:
+      - "5000:5000"
+    networks:
+      - mqtt-net
+    restart: no
 
 networks:
   mqtt-net:
+    driver: bridge
+
+

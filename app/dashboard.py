@@ -21,6 +21,7 @@ class QoSMonitorApp:
         self.qos_mode = "auto"
         self.manual_qos_level = 0
         self._setup_routes()
+        self.timeout = 5
 
     def _setup_routes(self):
         @self.app.route('/')
@@ -29,15 +30,19 @@ class QoSMonitorApp:
 
         @self.app.route('/data')
         def data():
+            # Szinkron lekérés a metrikákhoz
             metrics = monitor.get_metrics()
             self.latency = metrics['latency']
             self.loss = metrics['loss']
             self.messages_per_minute = metrics['messages_per_minute']
             self.max_latency = metrics['max_latency']
+
             if self.qos_mode == "auto":
-                self.qos_level = qos_selector.get_gos_level()
+                self.qos_level = qos_selector.get_qos_level()
             else:
                 self.qos_level = self.manual_qos_level
+
+            # Az összes adat egyszerre kerül visszaküldésre
             return jsonify(
                 latency=self.latency,
                 loss=self.loss,
@@ -54,22 +59,6 @@ class QoSMonitorApp:
             self.manual_qos_level = int(request_data.get("qos_level", 1))
             return jsonify({"status": "ok", "mode": self.qos_mode, "manual_qos_level": self.manual_qos_level})
 
-        @self.app.route("/set_network", methods=["POST"])
-        def set_network():
-            request_data = request.json
-            try:
-                latency_ms = float(request_data.get("latency", 0))
-                loss_percent = float(request_data.get("loss", 0))
-
-                delay_str = f"{latency_ms}ms"
-                loss_str = f"{loss_percent}%"
-
-                tc.apply_tc_settings(delay=delay_str, loss=loss_str)
-
-                return jsonify({"status": "ok", "latency": latency_ms, "loss": loss_percent})
-            except Exception as e:
-                return jsonify({"status": "error", "message": str(e)}), 400
-
     def start_async_loop(self):
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
@@ -79,7 +68,7 @@ class QoSMonitorApp:
     async def adaptive_qos_loop(self):
         while True:
             try:
-                await monitor.measure_rtt(self.qos_mode)
+                await monitor.measure_rtt(self.qos_mode, self.timeout, self.manual_qos_level, qos_selector)
                 await asyncio.sleep(1)
 
             except Exception as e:
@@ -90,11 +79,7 @@ class QoSMonitorApp:
         thread = threading.Thread(target=self.start_async_loop)
         thread.daemon = True
         thread.start()
-        try:
-            self.app.run(host='0.0.0.0', port=5000)
-        finally:
-            tc.reset_tc()  # tc állapot visszaállítása kilépéskor
-
+        self.app.run(host='0.0.0.0', port=5000)
 
 if __name__ == '__main__':
     app = QoSMonitorApp()
