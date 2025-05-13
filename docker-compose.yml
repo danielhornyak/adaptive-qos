@@ -12,9 +12,9 @@ services:
       - ./app/templates:/app/templates
     ports:
       - "5000:5000"
+      - "1883:1883"
     networks:
       - mqtt-net
-    restart: no
 
 networks:
   mqtt-net:

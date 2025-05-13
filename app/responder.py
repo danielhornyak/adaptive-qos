@@ -1,7 +1,8 @@
 from paho.mqtt.client import Client as MQTTClient
 
+
 class MQTTEchoServer:
-    def __init__(self, broker="test.mosquitto.org", port=1883, base_topic="rtt/test"):
+    def __init__(self, broker="broker.emqx.io", port=1883, base_topic="rtt/test"):
         self.broker = broker
         self.port = port
         self.base_topic = base_topic
@@ -20,12 +21,13 @@ class MQTTEchoServer:
         qos = msg.qos
         payload = msg.payload
         print(f"[EchoServer] Received: {payload.decode()}, QoS: {qos}")
-        client.publish(self.topic_response, payload=payload, qos=qos)
+        client.publish(self.topic_response, payload=payload, qos=1)
         print(f"[EchoServer] Responded with same payload on: {self.topic_response}")
 
     def run(self):
         self.client.connect(self.broker, self.port, 60)
         self.client.loop_forever()
+
 
 if __name__ == "__main__":
     server = MQTTEchoServer()
