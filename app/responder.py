@@ -2,7 +2,7 @@ from paho.mqtt.client import Client as MQTTClient
 
 
 class MQTTEchoServer:
-    def __init__(self, broker="broker.emqx.io", port=1883, base_topic="rtt/test"):
+    def __init__(self, broker="mqtt-broker", port=1883, base_topic="rtt/test"):
         self.broker = broker
         self.port = port
         self.base_topic = base_topic
@@ -13,16 +13,12 @@ class MQTTEchoServer:
         self.client.on_message = self.on_message
 
     def on_connect(self, client, userdata, flags, rc):
-        print(f"[EchoServer] Connected to broker with result code {rc}")
         client.subscribe(self.topic_request)
-        print(f"[EchoServer] Subscribed to: {self.topic_request}")
 
     def on_message(self, client, userdata, msg):
-        qos = msg.qos
+        message_qos = msg.qos
         payload = msg.payload
-        print(f"[EchoServer] Received: {payload.decode()}, QoS: {qos}")
-        client.publish(self.topic_response, payload=payload, qos=1)
-        print(f"[EchoServer] Responded with same payload on: {self.topic_response}")
+        client.publish(self.topic_response, payload=payload, qos=message_qos)
 
     def run(self):
         self.client.connect(self.broker, self.port, 60)

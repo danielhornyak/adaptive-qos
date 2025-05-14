@@ -113,12 +113,12 @@
 
             const avg = arr => arr.reduce((a, b) => a + b, 0) / arr.length;
             const avgRow = document.getElementById('avgRow');
-            avgRow.innerHTML =
+            avgRow.innerHTML =`
                 <td>${avg(allLatency).toFixed(2)}</td>
                 <td>${avg(allLoss).toFixed(2)}</td>
                 <td>${avg(allMessages).toFixed(2)}</td>
                 <td>${avg(allQos).toFixed(2)}</td>
-            ;
+            `;
         }
 
         async function setNetwork() {

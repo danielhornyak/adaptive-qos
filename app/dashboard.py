@@ -22,6 +22,7 @@ class QoSMonitorApp:
         self.manual_qos_level = 0
         self._setup_routes()
         self.timeout = 0.1
+        self.last_latency = 0
 
     def _setup_routes(self):
         @self.app.route('/')
@@ -31,10 +32,10 @@ class QoSMonitorApp:
         @self.app.route('/data')
         def data():
             metrics = monitor.get_metrics()
-            self.latency = metrics['latency']
             self.loss = metrics['loss']
             self.messages_per_minute = metrics['messages_per_minute']
             self.max_latency = metrics['max_latency']
+            self.last_latency = metrics['last_latency']
 
             if self.qos_mode == "auto":
                 self.qos_level = qos_selector.get_qos_level()
@@ -42,7 +43,7 @@ class QoSMonitorApp:
                 self.qos_level = self.manual_qos_level
 
             return jsonify(
-                latency=self.latency,
+                latency=self.last_latency,
                 loss=self.loss,
                 qos=self.qos_level,
                 messages_per_minute=self.messages_per_minute,
