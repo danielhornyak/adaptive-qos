@@ -70,6 +70,10 @@ class RTTMonitor:
 
         self.client.publish(self.req_topic, payload=message_id, qos=self.qos_level)
 
+        # ➕ Küldési idő regisztrálása
+        self.message_timestamps.append(current_time)
+        self._cleanup_old_timestamps()  # Régi időbélyegek törlése
+
         try:
             await asyncio.wait_for(event.wait(), timeout)
             self.message_count += 1
@@ -83,6 +87,20 @@ class RTTMonitor:
     def get_msg_per_minute(self):
         now = time.time()
         return sum(1 for ts in self.message_timestamps if now - ts <= 60)
+
+        # ➕ Aktuális msg/min kiírás
+        print(f"Üzenetek per perc: {self.get_msg_per_minute()}")
+
+    def _cleanup_old_timestamps(self):
+        """Eltávolítja az 1 percnél régebbi üzenetek időbélyegeit."""
+        now = time.time()
+        while self.message_timestamps and now - self.message_timestamps[0] > 60:
+            self.message_timestamps.popleft()
+
+    def get_msg_per_minute(self):
+        """Visszaadja az utóbbi 60 másodpercben küldött üzenetek számát."""
+        self._cleanup_old_timestamps()
+        return len(self.message_timestamps)
 
     def get_metrics(self):
 
